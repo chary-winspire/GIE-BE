@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Context path="/Notifications" docBase="Notifications"
+   crossContext="true" reloadable="true" debug="1">
+
+<Resource name="Notifications"
+    auth="Container"
+    factory="org.apache.commons.dbcp2.BasicDataSourceFactory"
+    driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    type="javax.sql.DataSource"
+    maxActive="20"
+    maxIdle="10"
+    maxWait="15000"
+    username="winspire"
+    password="winspire123"
+    url="jdbc:sqlserver://localhost;DatabaseName=WINSPIRE_NOTIFICATIONS"
+    removeAbandoned="true"
+    removeAbandonedTimeout="30"
+    logAbandoned="true" /> 
+</Context>
