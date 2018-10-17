@@ -33,7 +33,14 @@ public class Questionnaire implements Serializable {
    private String Option4;
    private String UserAnswer;
    private String Answer;
-   private String ImageUrl;
+   private String Comment;
+   public String getComment() {
+	return Comment;
+}
+public void setComment(String comment) {
+	Comment = comment;
+}
+private String ImageUrl;
 public int getID() {
 	return ID;
 }

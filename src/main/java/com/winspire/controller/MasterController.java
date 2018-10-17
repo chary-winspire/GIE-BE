@@ -146,11 +146,11 @@ public class MasterController {
 		
 	}
 	
-	//@RequestParam("id") int id,@RequestParam("type") String Type
+	//
 	@RequestMapping("/getQuestionnaire")
-	public ResponseEntity<String> getQuestionnaire() throws JSONException {
+	public ResponseEntity<String> getQuestionnaire(@RequestParam("id") int id,@RequestParam("type") String Type) throws JSONException {
 	
-	String questionnaireStr=pushService.getQuestionnaire(5,"SPDM");
+	String questionnaireStr=pushService.getQuestionnaire(id,Type);
 		JSONObject resultObj= new JSONObject();
 		if(questionnaireStr!=null){
 			resultObj.put("getQuestionnaireResult", true);
