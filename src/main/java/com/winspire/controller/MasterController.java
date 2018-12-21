@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +42,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -79,38 +89,29 @@ public class MasterController {
 	
 	public void getImage(@RequestParam("imageName") String imageName,  HttpServletResponse response) throws JSONException, IOException {
 
-		ObjectMapper objectMapper = new ObjectMapper();
-
-		String fileName = imageName;
-		// applicationType = CMSUtil.getApplicationName(applicationType);
-		File dir = new File(Constants.LOCAL_FILE_FOLDER_PATH);
-		File file = new File(dir.getCanonicalPath() + File.separator + fileName);
-		System.out.println("path2" + dir.getCanonicalPath() + File.separator + fileName);
-		if (!file.exists()) {
-			String errorMessage = "Sorry. The file you are looking for does not exist";
-			
-			OutputStream outputStream = response.getOutputStream();
-			outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-			outputStream.close();
-			return;
+		AWSCredentials credentials = new BasicAWSCredentials("AKIAIBQZ77AZPCKDPFJA", "aJey2BTVy5UO/+cKW/qYNptqpHbKM8ZR4FHzeudH");
+		AmazonS3 s3Client = new AmazonS3Client(credentials);
+		List<Bucket> buckets = s3Client.listBuckets();
+		for (Bucket bucket : buckets) {
+		        System.out.println(bucket.getName() + "\t" +
+		                StringUtils.fromDate(bucket.getCreationDate()));
 		}
-		String mimeType = WinspireUtil.getMimeType(file);
-		if (mimeType == null) {
-			System.out.println("mimetype is not detectable, will take default");
-			String errorMessage = "Sorry. The file you are looking for does not exist";
-			System.out.println(errorMessage);
-			OutputStream outputStream = response.getOutputStream();
-			outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-			outputStream.close();
-			return;
-		} else {
-			System.out.println("mimetype : " + mimeType);
-			response.setContentType(mimeType);
-			response.setHeader("Content-Disposition", String.format("inline; filename=\"%s\"", file.getName()));
-			response.setContentLength((int) file.length());
-			InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-			FileCopyUtils.copy(inputStream, response.getOutputStream());
-		}
+		GetObjectRequest request = new GetObjectRequest("winspireindia.in",
+				imageName);
+			  S3Object object = s3Client.getObject(request);
+			  S3ObjectInputStream objectContent = object.getObjectContent();
+			  try {
+				//IOUtils.copy(objectContent, new FileOutputStream("C://files//test.jpg"));
+				//InputStream inputStream = new BufferedInputStream(new FileInputStream(request.getServletContext().getRealPath("resources/images/"+imageName)));
+				FileCopyUtils.copy(objectContent, response.getOutputStream());
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
 	}
 	
 	@RequestMapping("/insertFcmToken")
@@ -149,7 +150,7 @@ public class MasterController {
 	//
 	@RequestMapping("/getQuestionnaire")
 	public ResponseEntity<String> getQuestionnaire(@RequestParam("id") int id,@RequestParam("type") String Type) throws JSONException {
-	
+		System.out.println("userData :"+ id + Type);
 	String questionnaireStr=pushService.getQuestionnaire(id,Type);
 		JSONObject resultObj= new JSONObject();
 		if(questionnaireStr!=null){

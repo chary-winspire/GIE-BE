@@ -21,12 +21,39 @@ public class SendNotificationsCron {
 	@Autowired
 	private PushService pushService;
 
-	@Scheduled(cron = "0 0 0/2 ? * *") //second, minute, hour, day of month, month, day(s) of week
-    public void sendReminders() throws JSONException, ClientProtocolException, IOException{
-		
-	pushService.sendNotifications();
+	@Scheduled(cron = "0 */30 * ? * *") //second, minute, hour, day of month, month, day(s) of week
+    public void sendMotivation() throws JSONException, ClientProtocolException, IOException{
+		System.out.println("sendNotifications:" );
+	pushService.sendNotifications("MOT");
 		
 	}
 	
+	@Scheduled(cron =  "0 0 */2 ? * *") //second, minute, hour, day of month, month, day(s) of week  "0 0 */2 ? * *"
+    public void sendPuzzle() throws JSONException, ClientProtocolException, IOException{
+		System.out.println("sendNotifications:" );
+	pushService.sendNotifications("PUZ");
+		
+	}
+	
+	@Scheduled(cron = "0 0 0/2 ? * *") //second, minute, hour, day of month, month, day(s) of week
+    public void sendGK() throws JSONException, ClientProtocolException, IOException{
+		System.out.println("sendNotifications:" );
+	pushService.sendNotifications("GK");
+		
+	}
+	
+	@Scheduled(cron = "0 0 1/2 ? * *") //second, minute, hour, day of month, month, day(s) of week
+    public void sendSpeedMaths() throws JSONException, ClientProtocolException, IOException{
+		System.out.println("sendNotifications:" );
+	pushService.sendNotifications("SPDM");
+		
+	}
+	
+	@Scheduled(cron = "0 0 */3 ? * *") //second, minute, hour, day of month, month, day(s) of week
+    public void sendWordpower() throws JSONException, ClientProtocolException, IOException{
+		System.out.println("sendNotifications:" );
+	pushService.sendNotifications("WORD");
+		
+	}
 	
 }

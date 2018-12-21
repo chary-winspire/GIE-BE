@@ -1,8 +1,10 @@
 package com.winspire.service.impl;
 
+import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -19,10 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.winspire.common.Constants;
 import com.winspire.dao.PushDAO;
 import com.winspire.entity.FCMTokens;
+import com.winspire.entity.NotificationData;
 import com.winspire.entity.NotificationDetails;
+import com.winspire.entity.NotificationRequestModel;
 import com.winspire.entity.Questionnaire;
 import com.winspire.entity.UserDetails;
 import com.winspire.service.PushService;
@@ -39,39 +45,61 @@ public class PushServiceImpl implements PushService {
 	ObjectMapper objectMapper=new ObjectMapper();
 	Date date= new Date();
 	@Override	
-	public void sendNotifications()  {
+	public void sendNotifications(String notificationType)  {
 		
 		ObjectMapper objectMapper= new ObjectMapper();
 		String response=null;
 		System.out.println("sendNotifications:" );
+		NotificationRequestModel notificationRequestModel = new NotificationRequestModel();
+        NotificationData notificationData = new NotificationData();
+        if(notificationType.equalsIgnoreCase("MOT")){
+        	notificationData.setId(0);
+        }else{
+        	Random r = new Random();
+        	int low = 1;
+        	int high = 13;
+        	int result = r.nextInt(high-low) + low;
+        	notificationData.setId(result);
+        }
+        notificationData.setType(notificationType);
 		List<FCMTokens> allTokens=pushDao.getAllFCMTokens();	
-		for(int i=0;i<2;i++){
-			JSONObject body = new JSONObject();
-			try {
-				body.put("to",  "/topics/" + Constants.TOPIC);
+		for(int i=0;i<allTokens.size();i++){
 			
-			body.put("priority", "high");
+			try {      
+			        notificationData.setTitle("Welcome to Winspire Go.");
+			        if(notificationType.equalsIgnoreCase("MOT")){
+			        	 notificationData.setDetail("Here is the Motivation for you.");
+			        }  if(notificationType.equalsIgnoreCase("PUZ")){
+			        	 notificationData.setDetail("Here is the Puzzle for you.");
+			        }  if(notificationType.equalsIgnoreCase("GK")){
+			        	 notificationData.setDetail("Here is the GK for you.");
+			        }  if(notificationType.equalsIgnoreCase("SPDM")){
+			        	 notificationData.setDetail("Here is the Speed Maths for you.");
+			        }  if(notificationType.equalsIgnoreCase("WORD")){
+			        	 notificationData.setDetail("Here is the Word Power for you.");
+			        }  
+			       
+			        notificationRequestModel.setData(notificationData);
+			        notificationRequestModel.setTo(allTokens.get(i).getFCMToken());
 
-			JSONObject notification = new JSONObject();
-			notification.put("title", "JSA Notification");
-			notification.put("body", "Happy Message!");
-			notification.put("body1", "Happy Message1!");
 
-			JSONObject data = new JSONObject();
-			data.put("Key-1", "JSA Data 1");
-			data.put("Key-2", "JSA Data 2");
-			data.put("Key-3", "JSA Data 3");
+			        Gson gson = new Gson();
+			        Type type = new TypeToken<NotificationRequestModel>() {
+			        }.getType();
 
-			body.put("notification", notification);
-			body.put("data", data);
+			        String json = gson.toJson(notificationRequestModel, type);
+
+			        StringEntity input = new StringEntity(json);
+			        input.setContentType("application/json");
+			        
+			        
 		        
 		        DefaultHttpClient httpClient = new DefaultHttpClient();
 		        HttpPost postRequest = new HttpPost(Constants.FIREBASE_API_URL);
 
 		
 
-		        StringEntity input = new StringEntity(body.toString());
-		        input.setContentType("application/json");
+		    
 
 
 		        postRequest.addHeader("Authorization", "key=" +Constants. FIREBASE_SERVER_KEY);
@@ -119,7 +147,7 @@ public class PushServiceImpl implements PushService {
 		try {
 			FCMTokens tokenObj= new FCMTokens();
 		
-			FCMTokens tokenDetails=	pushDao.getFCMDetails(deviceID);
+			FCMTokens tokenDetails=	pushDao.getFCMDetails(token);
 			if(tokenDetails!=null){
 				tokenDetails.setFCMToken(token);
 				tokenDetails.setDeviceID(deviceID);

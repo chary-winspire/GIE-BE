@@ -41,6 +41,7 @@ public void setComment(String comment) {
 	Comment = comment;
 }
 private String ImageUrl;
+
 public int getID() {
 	return ID;
 }

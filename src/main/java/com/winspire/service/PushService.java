@@ -18,7 +18,7 @@ import com.winspire.entity.UserDetails;
 
 public interface PushService {
 
-	void sendNotifications() throws JSONException, UnsupportedEncodingException, ClientProtocolException, IOException;
+	void sendNotifications(String string) throws JSONException, UnsupportedEncodingException, ClientProtocolException, IOException;
 
 	String getNotificationDetails();
 

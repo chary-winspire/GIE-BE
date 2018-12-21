@@ -2,24 +2,10 @@ package com.winspire.dao.impl;
 
 import java.util.List;
 
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
-
-import org.hibernate.FlushMode;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.context.spi.CurrentSessionContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate5.SessionFactoryUtils;
-import org.springframework.orm.hibernate5.SessionHolder;
-import org.springframework.orm.hibernate5.SpringFlushSynchronization;
-import org.springframework.orm.hibernate5.SpringSessionSynchronization;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 import com.winspire.dao.PushDAO;
 import com.winspire.entity.FCMTokens;
 import com.winspire.entity.NotificationDetails;
@@ -86,12 +72,12 @@ public class PushDAOImpl implements PushDAO {
 
 
 	@Override
-	public FCMTokens getFCMDetails(String deviceID) {
+	public FCMTokens getFCMDetails(String token) {
 	
 		String hql = "";
-		hql = " From FCMTokens where  DeviceID=:deviceID";
+		hql = " From FCMTokens where  FCMToken=:token order by CreatedDate desc";
 		Query query = sessionFactory.getCurrentSession().createQuery(hql);	
-		query.setParameter("deviceID", deviceID);
+		query.setParameter("token", token);
 		System.out.println("query:"+query );
 		query.setMaxResults(1);
 		FCMTokens listr =  (FCMTokens) query.uniqueResult();
